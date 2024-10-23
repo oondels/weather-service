@@ -1,0 +1,38 @@
+{
+  "name": "weather-service",
+  "version": "1.0.0",
+  "description": "Weather API Wrapper Service",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oondels/weather-service.git"
+  },
+  "keywords": [
+    "Weather",
+    "API",
+    "Node",
+    "Docker"
+  ],
+  "author": "Hendrius Félix (oondels)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/oondels/weather-service/issues"
+  },
+  "homepage": "https://github.com/oondels/weather-service#readme",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
