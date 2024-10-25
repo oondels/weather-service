@@ -112,14 +112,14 @@ header .menu-icon {
 /* First View */
 .weather-first-view {
   position: absolute;
-  transition: all 1s ease-in-out;
+  transition: all 1.3s ease-in-out;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
 
 .weather-first-view.transition {
-  top: -50%;
+  top: -70%;
   transform: translate(-50%, 0);
 }
 
@@ -156,7 +156,7 @@ header .menu-icon {
   left: 50%;
   transform: translate(-50%, 0);
   opacity: 0;
-  transition: all 1s ease-in-out;
+  transition: all 1.3s ease-in-out;
 }
 
 .second-view.transition {
