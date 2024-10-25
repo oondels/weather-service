@@ -12,7 +12,7 @@ const NavBar = () => {
       <nav>
         <i
           onClick={openNav}
-          class={`material-symbols-outlined menu-icon ${
+          className={`material-symbols-outlined menu-icon ${
             activeNav ? "active" : ""
           }`}
         >
@@ -21,13 +21,13 @@ const NavBar = () => {
         <div className={`links ${activeNav ? "active" : ""}`}>
           <div className="nav-icons">
             <Link to="/">
-              <i class="material-symbols-outlined">partly_cloudy_day</i>
+              <i className="material-symbols-outlined">partly_cloudy_day</i>
             </Link>
             <Link to="/login">
-              <i class="material-symbols-outlined">login</i>
+              <i className="material-symbols-outlined">login</i>
             </Link>
             <Link to="/register">
-              <i class="material-symbols-outlined">person_add</i>
+              <i className="material-symbols-outlined">person_add</i>
             </Link>
           </div>
         </div>

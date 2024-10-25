@@ -13,9 +13,10 @@ app.use("/auth", authRoutes);
 
 app.get("/api/weather", async (req, res) => {
   const city = req.query.city;
-  console.log(city);
   if (!city) {
-    return res.status(400).send({ error: "Cidade é obrigatória" });
+    return res
+      .status(400)
+      .json({ message: "You must to put one city", error: true });
   }
 
   try {
@@ -23,9 +24,12 @@ app.get("/api/weather", async (req, res) => {
     const response = await axios.get(
       `http://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}`
     );
-    res.status(200).json(response.data);
+
+    res.status(200).json({ weather: response.data, error: false });
   } catch (error) {
-    res.status(500).send({ error: "Error fetching weather forecast data" });
+    res
+      .status(500)
+      .json({ message: "Error fetching weather forecast data", error: true });
   }
 });
 

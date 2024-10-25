@@ -39,7 +39,7 @@ const Login = () => {
   };
 
   const handleLogin = () => {
-    window.location.href = `${ip}/auth/google`;
+    window.location.href = `${ip}/auth/github`;
   };
 
   return (
@@ -64,21 +64,17 @@ const Login = () => {
           placeholder="Password"
         />
 
-        <p>
-          Already have an account? <a href="/login">Sign In</a>
-        </p>
-
         <button onClick={loginUser} className="login-button">
           Login
         </button>
 
         <button onClick={handleLogin} className="google-login-button">
           <img
-            src="https://developers.google.com/identity/images/g-logo.png"
-            alt="Google Logo"
+            src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+            alt="GitHub Logo"
             className="google-logo"
           />
-          Sign in with Google
+          Sign in with Github
         </button>
       </div>
     </div>

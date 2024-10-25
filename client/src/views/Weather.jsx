@@ -22,18 +22,32 @@ function Weather() {
     setShoWeather(!showWeather);
   };
 
+  const [showAlert, setAlert] = useState(false);
+  const toggleAlert = (title, message) => {
+    const alertTitle = document.querySelector(".alert-title");
+    const alertMessage = document.querySelector(".alert-message");
+
+    if (title && message) {
+      alertTitle.innerText = title;
+      alertMessage.innerText = message;
+    }
+
+    setAlert(!showAlert);
+  };
+
   const fetchWeather = async () => {
     try {
       const response = await axios.get(
         `http://localhost:5000/api/weather?city=${city}`
       );
-      setWeather(response.data);
+      setWeather(response.data.weather);
+      console.log(response.data.weather);
       setTimeout(() => {
         handleWeather();
       }, 300);
-      console.log(response.data);
     } catch (error) {
-      console.error(error.response.data.error);
+      toggleAlert("Error", error.response.data.message);
+      console.error(error.response.data.message);
       setWeather(null);
     }
   };
@@ -41,6 +55,8 @@ function Weather() {
   return (
     <div className={`weather-container ${transition ? "" : "transition"}`}>
       <div className={`weather-first-view ${transition ? "transition" : ""}`}>
+        <img src="/weather.png" alt="Weather" />
+
         <div className="weather-title">
           <h1>Weather</h1> <span>ForeCasts</span>
         </div>
@@ -58,25 +74,25 @@ function Weather() {
 
           <input
             type="text"
-            placeholder="Digite o nome da cidade"
+            placeholder="Enter the city name"
             value={city}
             onChange={(e) => setCity(e.target.value)}
           />
-          <button onClick={fetchWeather}>Buscar Clima</button>
+          <button onClick={fetchWeather}>Search Weather</button>
         </div>
       )}
 
       {weather && (
         <div className={`weather-data`}>
           {showWeather && (
-            <button
+            <span
               onClick={() => {
                 handleWeather();
               }}
-              className="close-weather"
+              className="material-symbols-outlined close-weather"
             >
-              <CloseIcon />
-            </button>
+              undo
+            </span>
           )}
 
           <div className={`weather-card ${showWeather ? "show" : ""}`}>
@@ -122,7 +138,11 @@ function Weather() {
           </div>
         </div>
       )}
-      {/* {transition && <></>} */}
+      <div id="alert-message" className={`${showAlert ? "show" : ""}`}>
+        <h1 className="alert-title">Sucesso</h1>
+        <p className="alert-message"></p>
+        <button onClick={toggleAlert}>Fechar</button>
+      </div>
     </div>
   );
 }

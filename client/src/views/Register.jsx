@@ -81,18 +81,20 @@ const Register = () => {
           type="password"
           placeholder="Password"
         />
-
+        <p>
+          Already have an account? <a href="/login">Sign In</a>
+        </p>
         <button onClick={registerUser} className="login-button">
           Sign Up
         </button>
 
         <button onClick={handleRegister} className="google-login-button">
           <img
-            src="https://developers.google.com/identity/images/g-logo.png"
-            alt="Google Logo"
+            src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+            alt="GitHub Logo"
             className="google-logo"
           />
-          Sign in with Google
+          Sign up with Github
         </button>
       </div>
     </div>

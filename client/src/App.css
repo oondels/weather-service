@@ -94,7 +94,6 @@ header .menu-icon {
   background: linear-gradient(180deg, #2b0b59, #3f0e6a, #4b2e94, #6c57c7);
   height: 100vh;
   width: 400px;
-  border-radius: 20px;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -205,8 +204,13 @@ header .menu-icon {
   padding: 5px;
   background-color: #d9a126 !important;
   position: absolute;
-  top: 0;
+  top: 3%;
   z-index: 999 !important;
+  transition: all ease-in-out 0.2s;
+}
+
+.close-weather:hover {
+  background-color: #b17a05 !important;
 }
 
 /* Weather Data Searched*/
@@ -385,4 +389,48 @@ header .menu-icon {
 
 .google-login-button:hover {
   background-color: #f1f1f1;
+}
+
+/* Alert */
+
+#alert-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  background-color: #2c0c5c;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  text-align: center;
+  transition: all 0.4s ease-in-out;
+}
+
+#alert-message.show {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  z-index: 1000;
+}
+
+#alert-message button {
+  margin-top: 15px;
+  padding: 10px 15px;
+  background-color: #3f51b5;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#alert-message button:hover {
+  background-color: #303f9f;
+}
+
+#alert-message h1 {
+  font-size: 30px;
+}
+#alert-message p {
+  font-size: 20px;
 }
