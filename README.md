@@ -42,28 +42,43 @@ This project is a Wrapper Service for the Weather API, built using Node.js for t
 2. Install backend dependencies:
 
    ```bash
+   cd server/
    npm install
    ```
 
 3. Create a `.env` file in the root of the backend and add the following environment variables:
 
    ```env
+   WEATHER_API_KEY=your_weatherapi_key
    PORT=5000
    JWT_SECRET=your_secret_key
-   WEATHER_API_KEY=your_weatherapi_key
    GITHUB_CLIENT_ID=your_github_client_id
    GITHUB_CLIENT_SECRET=your_github_client_secret
+   EMAIL=your_email
+   PASS=your_email_app_pass
+   HOST_MAIL="smtp.gmail.com" -> for gmail accounts
+   HOST_PORT=465
    ```
 
-4. Run database migrations to set up SQLite3:
+4. Create the database:
 
-   ```bash
-   npx sequelize-cli db:migrate
+   ```sql
+   CREATE TABLE users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT,
+      username TEXT NOT NULL,
+      password TEXT,
+      user_github INTEGER,
+      account_validation BOOLEAN,
+      created_at TIMESTAMP DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TIMESTAMP DEFAULT (CURRENT_TIMESTAMP)
+   );
    ```
 
 5. Run the backend locally:
    ```bash
-   npm start
+   npm run dev
    ```
 
 ### Frontend
@@ -71,7 +86,7 @@ This project is a Wrapper Service for the Weather API, built using Node.js for t
 1. Navigate to the frontend folder:
 
    ```bash
-   cd ../weather-frontend
+   cd ../client
    ```
 
 2. Install frontend dependencies:
