@@ -3,15 +3,29 @@ const axios = require("axios");
 const cors = require("cors");
 require("dotenv").config();
 const authRoutes = require("./utils/auth/authRoutes.js");
+const checkToken = require("./utils/auth/auth.js");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(express.json());
-app.use(cors());
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 app.use("/auth", authRoutes);
 
-app.get("/api/weather", async (req, res) => {
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Hello World!" });
+});
+
+app.get("/api/weather", checkToken, async (req, res) => {
   const city = req.query.city;
   if (!city) {
     return res
@@ -31,6 +45,12 @@ app.get("/api/weather", async (req, res) => {
       .status(500)
       .json({ message: "Error fetching weather forecast data", error: true });
   }
+});
+
+app.get("/protected", checkToken, (req, res) => {
+  res
+    .status(200)
+    .json({ message: "You have accessed a protected route!", user: req.user });
 });
 
 app.listen(port, () => {

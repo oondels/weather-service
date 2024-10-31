@@ -1,8 +1,12 @@
-import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import React, { useState } from "react";
+import ip from "../ip";
+import { useAuth } from "../utils/Auth";
 
 function Weather() {
+  const { user } = useAuth();
+  // console.log(user);
+
   const [city, setCity] = useState("");
   let [weather, setWeather] = useState(null);
   const [showWeather, setShoWeather] = useState(null);
@@ -37,9 +41,9 @@ function Weather() {
 
   const fetchWeather = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:5000/api/weather?city=${city}`
-      );
+      const response = await axios.get(`${ip}/api/weather?city=${city}`, {
+        withCredentials: true,
+      });
       setWeather(response.data.weather);
       console.log(response.data.weather);
       setTimeout(() => {
@@ -50,6 +54,10 @@ function Weather() {
       console.error(error.response.data.message);
       setWeather(null);
     }
+  };
+
+  const resendEmail = () => {
+    console.log("Resending email");
   };
 
   return (
@@ -143,6 +151,16 @@ function Weather() {
         <p className="alert-message"></p>
         <button onClick={toggleAlert}>Fechar</button>
       </div>
+
+      {user && !user.account_validation && !user.githubId && (
+        <div className="warning-account-not-verified">
+          <h1>You must to verify your account</h1>
+          <p>
+            Checkout your email imbox, if doesnot have, click in the link bellow
+          </p>
+          <button onClick={resendEmail}>Send Verification Link</button>
+        </div>
+      )}
     </div>
   );
 }

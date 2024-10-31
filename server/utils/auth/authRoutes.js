@@ -27,15 +27,45 @@ passport.use(
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
       callbackURL: "http://localhost:5000/auth/github/callback",
     },
-    (accessToke, refreshToken, profile, done) => {
+    (accessToken, refreshToken, profile, done) => {
       const user = {
         githubId: profile.id,
         username: profile.username,
-        name: profile.displayName,
+        email: null,
+        account_validation: false,
       };
 
       const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: "1h" });
-      done(null, { user, token });
+
+      const checkUser = `SELECT * FROM users WHERE username = ?`;
+      db.get(checkUser, [profile.username], (error, row) => {
+        if (error) {
+          console.error("Error registering with Github.");
+          return done(error, null);
+        }
+
+        if (row) {
+          return done(null, { user, token });
+        }
+
+        const registerUser = `
+      INSERT INTO users (username, name, user_github)
+      VALUES (?, ?, ?)
+      `;
+
+        db.run(
+          registerUser,
+          [profile.username, profile.displayName, profile.id],
+          (error) => {
+            if (error) {
+              console.error("Error registering user data");
+              return done(error, null);
+            }
+
+            return done(null, { user, token });
+          }
+        );
+      });
     }
   )
 );
@@ -49,16 +79,38 @@ router.get(
   "/github/callback",
   passport.authenticate("github", { session: false }),
   async (req, res) => {
-    res.cookie("token", req.user.token, {
+    const token = req.user.token;
+
+    res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 3600000,
       sameSite: "strict",
     });
 
-    res.redirect("http://localhost:3000/");
+    res.redirect(`http://localhost:3000/`);
   }
 );
+
+router.get("/check-auth", (req, res) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res
+      .status(401)
+      .json({ authenticated: false, message: "No token Provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return res
+      .status(200)
+      .json({ authenticated: true, user: decoded, token: token });
+  } catch (err) {
+    return res
+      .status(401)
+      .json({ authenticated: false, message: "Error decodificating Token" });
+  }
+});
 
 router.post("/register", async (req, res) => {
   try {
@@ -89,7 +141,40 @@ router.post("/register", async (req, res) => {
     }
 
     // Check username disponibility
-    // Query sqlite
+    const queryUser = `
+    SELECT * FROM users
+    WHERE username = ?
+    `;
+    db.get(queryUser, [username], (error, row) => {
+      if (error) {
+        console.log("Error fetching data.");
+        return res
+          .status(400)
+          .json({ message: "Error fetching data.", error: true });
+      }
+      if (row)
+        return res
+          .status(403)
+          .json({ message: "Username already in use.", error: true });
+    });
+
+    // Check username disponibility
+    const queryEmail = `
+    SELECT * FROM users
+    WHERE email = ?
+    `;
+    db.get(queryEmail, [email], (error, row) => {
+      if (error) {
+        console.log("Error fetching data.");
+        return res
+          .status(400)
+          .json({ message: "Error fetching data.", error: true });
+      }
+      if (row)
+        return res
+          .status(403)
+          .json({ message: "Email already in use.", error: true });
+    });
 
     const verificationToken = jwt.sign(
       {
@@ -99,6 +184,21 @@ router.post("/register", async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
+    const hashedPassword = await bcrypt.hash(password, 8);
+
+    // Post User sqlite
+    const postUser = `
+      INSERT INTO users (name, email, username, password)
+      VALUES (?,?,?,?)
+    `;
+    db.run(postUser, [name, email, username, hashedPassword], (error) => {
+      if (error) {
+        console.error("Error during registration:", error.message);
+        return res
+          .status(400)
+          .json({ message: "Error during registration", error: true });
+      }
+    });
 
     const verificationLink = `${ip}/auth/verify-email?token=${verificationToken}`;
     // Envio de Email
@@ -150,21 +250,126 @@ router.post("/register", async (req, res) => {
           error: true,
         });
       });
-
-    const hashedPassword = await bcrypt.hash(password, 8);
-
-    // Post User sqlite
-
-    // if (postUser.rows.length === 0) {
-    //   return res
-    //     .status(400)
-    //     .json({ message: "Failed to Register", error: true });
-    // }
   } catch (error) {
     console.error("Error to register: ", error);
     return res
       .status(500)
       .json({ message: "Internal server error", error: true });
+  }
+});
+
+router.post("/login", async (req, res) => {
+  try {
+    const { emailUser, password } = req.body;
+    const queryLogin = `
+      SELECT * FROM users
+      WHERE email = ? OR username = ?
+    `;
+    db.get(queryLogin, [emailUser, emailUser], async (error, row) => {
+      if (error) {
+        console.log("Error fetching user or email: ", error);
+        return res
+          .status(500)
+          .json({ message: "Error fetching user or email.", error: true });
+      }
+
+      if (!row) {
+        return res.status(404).json({ message: "Invalid Credentials." });
+      }
+
+      const checkPassword = await bcrypt.compare(password, row.password);
+      if (!checkPassword) {
+        return res
+          .status(404)
+          .json({ message: "Invalid Credentials.", error: true });
+      }
+
+      const token = jwt.sign(
+        {
+          username: row.username,
+          id: row.id,
+          account_validation: row.account_validation,
+          email: row.email,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+      );
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 3600000,
+        sameSite: "strict", // Prevent CSRF
+      });
+
+      return res.status(200).json({
+        message: `Login successful ${row.username}`,
+        error: false,
+        token: token,
+      });
+    });
+  } catch (error) {
+    console.error("Login failed: ", error);
+    return res.status(500).json({ message: "Login failed.", error: true });
+  }
+});
+
+router.post("/logout", (req, res) => {
+  res.cookie("token", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 0,
+    path: "/",
+  });
+
+  res.status(200).json({ message: "Successfully Logout" });
+});
+
+router.get("/verify-email", async (req, res) => {
+  const token = req.query.token;
+
+  if (!token) {
+    return res
+      .status(400)
+      .json({ message: "Invalid token provided.", error: true });
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const queryUser = `
+    UPDATE users 
+    SET 
+      account_validation = true
+    WHERE 
+      username = ?
+    RETURNING *
+    `;
+
+    db.get(queryUser, [decoded.username], (error, row) => {
+      if (error) {
+        return res.status(400).json({
+          message: "An error occurred while processing your request.",
+          error: true,
+        });
+      }
+
+      if (!row) {
+        return res.status(400).json({
+          message: "User not found or already verified.",
+          error: true,
+        });
+      }
+
+      return res
+        .status(200)
+        .json({ message: "Account verified successfully", error: false });
+    });
+  } catch (error) {
+    console.error("Token verification failed: ", error);
+    return res
+      .status(500)
+      .json({ message: "Invalid or expired token.", error: true });
   }
 });
 

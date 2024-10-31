@@ -1,16 +1,22 @@
 import React, { useState } from "react";
 import ip from "../ip";
 
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../utils/Auth";
+
 const Login = () => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
 
   const data = {
-    userEmail: username,
+    emailUser: username,
     password: password,
   };
 
-  const loginUser = () => {
+  const loginUser = async () => {
     fetch(`${ip}/auth/login`, {
       method: "POST",
       headers: {
@@ -19,22 +25,24 @@ const Login = () => {
       body: JSON.stringify(data),
       credentials: "include",
     })
-      .then((response) => {
-        // if (!response.ok) {
-        //   return console.error("Error at login solicitation: ", error);
-        // }
+      .then(async (response) => {
+        if (!response.ok) {
+          const responseData = await response.json();
+          console.error("Error at login solicitation: ", responseData.message);
+          return alert(responseData.message);
+        }
 
         return response.json();
       })
       .then((data) => {
-        // toggleAlert("Success", data.message);
-        // login();
-        // setTimeout(() => {
-        //   navigate("/tasks");
-        // }, 1500);
+        alert(data.message);
+        login(data.token);
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
       })
       .catch((error) => {
-        console.error("Error at login: ", error);
+        console.error("Error at login");
       });
   };
 
@@ -62,6 +70,11 @@ const Login = () => {
           value={password}
           type="password"
           placeholder="Password"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              loginUser();
+            }
+          }}
         />
 
         <button onClick={loginUser} className="login-button">

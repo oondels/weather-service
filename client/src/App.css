@@ -434,3 +434,44 @@ header .menu-icon {
 #alert-message p {
   font-size: 20px;
 }
+
+/* Verify Account */
+.warning-account-not-verified {
+  position: absolute;
+  top: 20px;
+  transform: translateX(-50%, 50%);
+  background-color: rgba(255, 165, 0, 0.9);
+  color: #fff;
+  padding: 15px 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+  z-index: 1000;
+  max-width: 200px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.warning-account-not-verified h1 {
+  font-size: 18px;
+  margin: 0 0 10px;
+}
+
+.warning-account-not-verified p {
+  font-size: 14px;
+  margin: 0 0 15px;
+}
+
+.warning-account-not-verified button {
+  background-color: #fff;
+  color: #333;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.warning-account-not-verified button:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+}

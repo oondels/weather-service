@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ip from "../ip";
 
 const Register = () => {
@@ -6,6 +7,8 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
 
   const data = {
     name: name,
@@ -23,27 +26,32 @@ const Register = () => {
       body: JSON.stringify(data),
       credentials: "include",
     })
-      .then((response) => {
-        // if (!response.ok) {
-        //   return console.error("Error at login solicitation: ", error);
-        // }
+      .then(async (response) => {
+        if (!response.ok) {
+          const responseData = await response.json();
+          alert(responseData.message);
+          return console.error("Error at register solicitation");
+        }
 
         return response.json();
       })
       .then((data) => {
-        // toggleAlert("Success", data.message);
-        // login();
-        // setTimeout(() => {
-        //   navigate("/tasks");
-        // }, 1500);
+        if (data.error === false) {
+          alert(data.message);
+          return setTimeout(() => {
+            navigate("/login");
+          }, 1500);
+        }
+
+        alert(data.message);
       })
       .catch((error) => {
-        console.error("Error at login: ", error);
+        console.error("Error at register: ", error);
       });
   };
 
   const handleRegister = () => {
-    window.location.href = `${ip}/auth/google`;
+    window.location.href = `${ip}/auth/github`;
   };
 
   return (

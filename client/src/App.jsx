@@ -1,6 +1,9 @@
 import React from "react";
-import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
+
+import { Auth } from "./utils/Auth";
+import ProtectedRoute from "./utils/ProtectedRoute";
 
 import NavBar from "./components/NavBar";
 import Login from "./views/Login";
@@ -10,17 +13,26 @@ import Weather from "./views/Weather";
 function App() {
   return (
     <div className="App">
-      <Router>
-        <NavBar />
+      <Auth>
+        <Router>
+          <NavBar />
 
-        <main>
-          <Routes>
-            <Route path="/" element={<Weather />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-          </Routes>
-        </main>
-      </Router>
+          <main>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Weather />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+            </Routes>
+          </main>
+        </Router>
+      </Auth>
     </div>
   );
 }
